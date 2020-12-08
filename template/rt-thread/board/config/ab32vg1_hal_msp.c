@@ -49,7 +49,7 @@ void hal_dac_mspinit(struct dac_handle *hdac)
 {
 }
 
-void hal_sd_mspinit(sd_handle_t hsd)
+void hal_sd_mspinit(uint32_t hsd)
 {
     struct gpio_init gpio_init;
 
