@@ -6,6 +6,8 @@
 
 #include "ab32vg1_hal.h"
 
+#ifdef HAL_RCU_MODULE_ENABLED
+
 void hal_rcu_periph_clk_enable(uint32_t periph)
 {
     if (periph <= RCU_TMR2) {
@@ -23,3 +25,5 @@ void hal_rcu_periph_clk_disable(uint32_t periph)
         CLKGAT1 &= ~BIT(periph - RCU_FMAMFDT);
     }
 }
+
+#endif

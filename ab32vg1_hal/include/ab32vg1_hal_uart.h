@@ -43,7 +43,7 @@ struct uart_init
  */
 struct uart_handle
 {
-    uint32_t            instance;
+    hal_sfr_t           instance;
     struct uart_init    init;
 };
 
@@ -99,6 +99,10 @@ struct uart_handle
 #define UART1N                                (0x01u)         /*!< Number of UART1        */
 #define UART2N                                (0x02u)         /*!< Number of UART2        */
 
+#define UART0_BASE                            ((hal_sfr_t)(&UART0CON))
+#define UART1_BASE                            ((hal_sfr_t)(&UART1CON))
+#define UART2_BASE                            ((hal_sfr_t)(&UART2CON))
+
 /* Exported function */
 /** @addtogroup UART_Exported_Functions UART Exported Functions
   * @{
@@ -110,18 +114,18 @@ struct uart_handle
 
 /* Initialization functions */
 hal_error_t hal_uart_init(struct uart_handle *huart);
-void hal_uart_deinit(uint32_t uartx);
+void hal_uart_deinit(hal_sfr_t uartx);
 void hal_uart_mspinit(struct uart_handle *huart);
 
 /**
   * @}
   */
 
-void hal_uart_control(uint32_t uartx, uint32_t cntl, uint32_t param);
-void hal_uart_write(uint32_t uartx, uint8_t data);
-uint8_t hal_uart_read(uint32_t uartx);
-uint32_t hal_uart_getflag(uint32_t uartx, uint32_t flag);
-void hal_uart_clrflag(uint32_t uartx, uint32_t flag);
+void hal_uart_control(hal_sfr_t uartx, uint32_t cntl, uint32_t param);
+void hal_uart_write(hal_sfr_t uartx, uint8_t data);
+uint8_t hal_uart_read(hal_sfr_t uartx);
+uint32_t hal_uart_getflag(hal_sfr_t uartx, uint32_t flag);
+void hal_uart_clrflag(hal_sfr_t uartx, uint32_t flag);
 
 /**
   * @}

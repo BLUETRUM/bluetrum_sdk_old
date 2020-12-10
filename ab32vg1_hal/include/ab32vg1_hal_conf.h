@@ -8,15 +8,37 @@
 #define AB32VG1_HAL_CONF_H__
 
 /*  System Configuration  */
+#define HAL_GPIO_MODULE_ENABLED
+#define HAL_UART_MODULE_ENABLED
+#define HAL_RCU_MODULE_ENABLED
+#define HAL_WDT_MODULE_ENABLED
+// #define HAL_DAC_MODULE_ENABLED
+// #define HAL_SD_MODULE_ENABLED
 
 /*  Includes  */
+#ifdef HAL_GPIO_MODULE_ENABLED
 #include "ab32vg1_hal_gpio.h"
+#endif
+
+#ifdef HAL_UART_MODULE_ENABLED
 #include "ab32vg1_hal_uart.h"
+#endif
+
+#ifdef HAL_RCU_MODULE_ENABLED
 #include "ab32vg1_hal_rcu.h"
+#endif
+
+#ifdef HAL_WDT_MODULE_ENABLED
 #include "ab32vg1_hal_wdt.h"
+#endif
+
+#ifdef HAL_DAC_MODULE_ENABLED
 #include "ab32vg1_hal_dac.h"
+#endif
+
+#ifdef HAL_SD_MODULE_ENABLED
 #include "ab32vg1_hal_sd.h"
-#include "ab32vg1_hal_sdio.h"
+#endif
 
 #include <assert.h>
 

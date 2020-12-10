@@ -16,7 +16,7 @@ struct dac_init
 
 struct dac_handle
 {
-    uint32_t            instance;
+    hal_sfr_t           instance;
     struct dac_init     init;
 };
 

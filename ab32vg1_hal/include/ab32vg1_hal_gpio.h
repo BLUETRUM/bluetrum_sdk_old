@@ -39,21 +39,8 @@ enum
     GPIOxPU300K,
     GPIOxPD300K,
 };
+
 /* Private constants */
-// #define GPIOxSET            0x00
-// #define GPIOxCLR            0x01
-// #define GPIOx               0x02
-// #define GPIOxDIR            0x03
-// #define GPIOxDE             0x04
-// #define GPIOxFEN            0x05
-// #define GPIOxDRV            0x06
-// #define GPIOxPU             0x07   /* Only valid when port is used as input */
-// #define GPIOxPD             0x08
-// #define GPIOxPU200K         0x09
-// #define GPIOxPD200K         0x0A
-// #define GPIOxPU300K         0x0B
-// #define GPIOxPD300K         0x0C
-#define GPIOx_REG(port, func)   *(volatile uint32_t*)(SFR6_BASE + (func + (port << 4))*4)
 
 #define FUNCMCONx(x)            *(volatile uint32_t*)(SFR0_BASE + (0x07 + (x))*4)
 

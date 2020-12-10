@@ -6,6 +6,8 @@
 
 #include "ab32vg1_hal.h"
 
+#ifdef HAL_GPIO_MODULE_ENABLED
+
 #if 0
 #define HAL_LOG(...)       hal_printf(__VA_ARGS__)
 #else
@@ -141,3 +143,5 @@ void hal_gpio_toggle(hal_sfr_t gpiox, uint8_t pin)
 {
     gpiox[GPIOx] ^= BIT(pin);
 }
+
+#endif

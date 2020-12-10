@@ -1,4 +1,8 @@
 #include "ab32vg1_hal.h"
+#include "ab32vg1_ll_sdio.h"
+
+#ifdef HAL_SD_MODULE_ENABLED
+
 #include <stdbool.h>
 
 #define HAL_LOG(...)     hal_printf(__VA_ARGS__)
@@ -176,3 +180,5 @@ hal_error_t hal_sd_init(sd_handle_t hsd)
 void hal_sd_deinit(uint32_t sdx)
 {
 }
+
+#endif

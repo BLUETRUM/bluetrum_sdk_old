@@ -6,5 +6,9 @@
 
 #include "ab32vg1_hal.h"
 
+#ifdef HAL_DAC_MODULE_ENABLED
+
 WEAK void hal_dac_mspinit(struct dac_handle *hdac)
 {}
+
+#endif

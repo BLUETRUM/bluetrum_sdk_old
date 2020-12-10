@@ -36,20 +36,3 @@ void hal_udelay(uint16_t nus)
 
 WEAK void hal_printf(const char *format, ...)
 {}
-
-char *strrchr (const char * string, int ch)
-{
-	char *start = (char *)string;
-
-	while (*string++)                       /* find end of string */
-			;
-											/* search towards front */
-	while (--string != start && *string != (char)ch)
-			;
-
-	if (*string == (char)ch)                /* char found ? */
-			return( (char *)string );
-
-	return(HAL_NULL);
-}
-
