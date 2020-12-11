@@ -92,8 +92,8 @@ bool sdio_check_rsp(hal_sfr_t sdiox)
 bool sdio_send_cmd(hal_sfr_t sdiox, uint32_t cmd, uint32_t arg)
 {
     uint32_t time_out = (cmd & CBUSY) ? RSP_BUSY_TIMEOUT : RSP_TIMEOUT;
-    sdiox[SDCMD] = cmd;
     sdiox[SDARG3] = arg;
+    sdiox[SDCMD] = cmd;
 
     while (sdio_check_finish(sdiox) == false) {
         if (--time_out == 0) {
@@ -108,12 +108,12 @@ bool sdio_send_cmd(hal_sfr_t sdiox, uint32_t cmd, uint32_t arg)
 
 uint8_t sdio_get_cmd_rsp(hal_sfr_t sdiox)
 {
-    return -1;
+    return sdiox[SDCMD];
 }
 
 uint32_t sdio_get_rsp(hal_sfr_t sdiox, uint32_t rsp)
 {
-    return -1;
+    return sdiox[SDARG0];
 }
 
 void sdio_read_kick(hal_sfr_t sdiox, void* buf)
@@ -127,29 +127,119 @@ bool sdio_isbusy(hal_sfr_t sdiox)
     return false;
 }
 
-void sdmmc_go_idle_state(hal_sfr_t sdiox)
+bool sdmmc_cmd_go_idle_state(hal_sfr_t sdiox)
 {
     // hal_sfr_t sdiox = hsd->instance;
-    sdio_send_cmd(sdiox, 0x00 | RSP_NO, 0);
+    return sdio_send_cmd(sdiox, 0 | RSP_NO, 0);
 }
 
-void sdmmc_send_if_cond(hal_sfr_t sdiox)
+bool sdmmc_cmd_send_if_cond(hal_sfr_t sdiox)
 {
     // hal_sfr_t sdiox = hsd->instance;
-    sdio_send_cmd(sdiox, 0x08 | RSP_7, SDMMC_CHECK_PATTERM);
+    return sdio_send_cmd(sdiox, 8 | RSP_7, SDMMC_CHECK_PATTERM);
+}
+
+bool sdmmc_cmd_app(hal_sfr_t sdiox, uint32_t rca)
+{
+    // hal_sfr_t sdiox = hsd->instance;
+    return sdio_send_cmd(sdiox, 55 | RSP_1, rca);
+}
+
+bool sdmmc_acmd_op_cond(hal_sfr_t sdiox, uint32_t voltage, uint32_t rca)
+{
+    if (sdmmc_cmd_app(sdiox, rca)) {
+        if (sdio_send_cmd(sdiox, 41 | RSP_3, voltage)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /*************************  HAL ************************************/
 
-
-static void sd_poweron(sd_handle_t hsd)
+static bool sd_type_identification(sd_handle_t hsd)
 {
-    sdmmc_go_idle_state(hsd->instance);
-    sdmmc_send_if_cond(hsd->instance);
-    if (hsd->instance[SDCMD] == 0x08) {
-        hsd->sdcard.type = CARD_V2;
-        HAL_LOG("SD 2.0\n");
+    uint8_t retry = 3;
+    while (retry-- > 0)
+    {
+        sdmmc_cmd_go_idle_state(hsd->instance);
+        if (sdmmc_cmd_send_if_cond(hsd->instance)) {
+            if (sdio_get_cmd_rsp(hsd->instance) == 0x08) {
+                hsd->sdcard.type = CARD_V2;
+                HAL_LOG("SD 2.0\n");
+                return true;
+            }
+            continue;
+        }
+        if (sdmmc_acmd_op_cond(hsd->instance, 0x00ff8000, 0u)) {
+            hsd->sdcard.type = CARD_V1;
+            HAL_LOG("SD 1.0\n");
+            return true;
+        }
+        hal_mdelay(20);
     }
+    return false;
+}
+
+static bool sd_go_ready_try(sd_handle_t hsd)
+{
+    uint32_t tmp = 0;
+    switch (hsd->sdcard.type)
+    {
+    case CARD_V1:
+        sdmmc_acmd_op_cond(hsd->instance, 0x00ff8000, hsd->sdcard.rca);
+        break;
+    
+    case CARD_V2:
+        sdmmc_acmd_op_cond(hsd->instance, 0x40ff8000, hsd->sdcard.rca);
+        break;
+    default:
+        break;
+    }
+
+    if (0 == (hsd->instance[SDARG3] & BIT(31))) {
+        HAL_LOG("SDARG3=0x%x\n", hsd->instance[SDARG3]);
+        return false; // no ready
+    }
+
+    if ((hsd->sdcard.type == CARD_V2) && (hsd->instance[SDARG3] & BIT(30))) {
+        HAL_LOG("SDHC\n");
+    }
+
+    return true;
+}
+
+static bool sd_go_ready(sd_handle_t hsd)
+{
+    if (hsd->sdcard.type == CARD_INVAL) {
+        return false;
+    }
+
+    uint8_t retry = 10;
+    while (retry-- > 0)
+    {
+        if (sd_go_ready_try(hsd) == true) {
+            return true;
+        }
+        hal_mdelay(20);
+    }
+
+    return false;
+}
+
+static bool sd_poweron(sd_handle_t hsd)
+{
+    if (sd_type_identification(hsd) == false) {
+        HAL_LOG("card invalid\n");
+        return false;
+    }
+
+    if (sd_go_ready(hsd) == false) {
+        HAL_LOG("no ready\n");
+        return false;
+    }
+
+    return true;
 }
 
 void hal_sd_initcard(sd_handle_t hsd)

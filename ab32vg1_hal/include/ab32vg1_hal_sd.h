@@ -31,6 +31,7 @@ typedef struct sd_handle* sd_handle_t;
 
 #define SD0N            (0x00u)
 
+#define CARD_INVAL      (0x00u)
 #define CARD_V1         (0x01u)
 #define CARD_V2         (0x02u)
 #define CARD_MMC        (0x03u)
